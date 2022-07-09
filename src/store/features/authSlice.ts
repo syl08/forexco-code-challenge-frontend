@@ -57,10 +57,27 @@ export const login = createAsyncThunk(
   }
 );
 
+export const profile = createAsyncThunk('profile', async (_, thunkApi) => {
+  try {
+    const res = await http.get(API.profile);
+    return JSON.stringify(res);
+  } catch (error) {
+    return thunkApi.rejectWithValue(
+      JSON.stringify((error as AxiosError).response)
+    );
+  }
+});
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.authenticated = false;
+      localStorage.removeItem('token');
+    },
+  },
   extraReducers: {
     // register states
     [register.pending.type]: () => {},
@@ -68,13 +85,28 @@ export const authSlice = createSlice({
     [register.rejected.type]: () => {},
     // login states
     [login.pending.type]: () => {},
-    [login.fulfilled.type]: (state, action: PayloadAction<string>) => {
-      const { data } = JSON.parse(action.payload);
-      localStorage.setItem('token', data.access);
+    [login.fulfilled.type]: (state) => {
       state.authenticated = true;
     },
     [login.rejected.type]: () => {},
+    // profile states
+    [profile.pending.type]: () => {},
+    [profile.fulfilled.type]: (state, action: PayloadAction<string>) => {
+      const { data } = JSON.parse(action.payload);
+      const user: UserType = {
+        id: data.id,
+        username: data.username,
+      };
+      state.authenticated = true;
+      state.user = user;
+    },
+    [profile.rejected.type]: (state) => {
+      state.authenticated = false;
+      state.user = null;
+    },
   },
 });
+
+export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;

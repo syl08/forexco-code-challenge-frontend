@@ -7,11 +7,16 @@ import { login } from '../store/features/authSlice'
 export default function Login() {
   const dispatch = useAppDispatch()
   const [data, setData] = useState({ username: '', password: '' })
+  const [checked, setChecked] = useState(false)
   const [error, setError] = useState(false)
   const [errorMessage, setErrorMessage] = useState(' ')
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, key: 'username' | 'password') => {
     setData({ ...data, [key]: event.currentTarget.value })
+  }
+
+  const handleCheckChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked)
   }
 
   const handleFocus = (event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -30,6 +35,10 @@ export default function Login() {
       const response = JSON.parse(res.payload as string)
       switch (response.status) {
         case 200:
+          if (checked) {
+            const { data } = response;
+            localStorage.setItem('token', data.access_token);
+          }
           break
         case 401: setError(true)
           setErrorMessage('* Username or password not match')
@@ -81,7 +90,7 @@ export default function Login() {
             </Box>
             <Box width='322px'>
               <FormControlLabel
-                control={<Checkbox size='small' sx={{ color: '#e3dcc8', borderRadius: 5 }} />}
+                control={<Checkbox checked={checked} onChange={handleCheckChange} size='small' sx={{ color: '#e3dcc8', borderRadius: 5 }} />}
                 label={<Typography color='#a39e8e' variant="body2">Remember me next time</Typography>} />
             </Box>
             <StyledButton type='submit' variant='contained' >Sign in</StyledButton>
