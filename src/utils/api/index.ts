@@ -18,8 +18,8 @@ axios.interceptors.request.use(
         ...config.headers,
         Authorization: `Bearer ${token}`,
       };
-      return config;
     }
+    return config;
   },
   (error: AxiosError) => {
     return Promise.reject(error);
