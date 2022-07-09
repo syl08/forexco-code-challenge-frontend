@@ -10,6 +10,7 @@ import Register from './page/register';
 
 function App() {
   const auth = useProfile()
+
   return (
     <BrowserRouter>
       <Routes>

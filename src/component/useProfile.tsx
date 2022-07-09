@@ -5,16 +5,19 @@ import { useAppDispatch } from '../store/hooks';
 export function useProfile() {
   const dispatch = useAppDispatch()
   const [auth, setAuth] = useState(false)
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
-    dispatch(profile()).then(res => {
-      const response = JSON.parse(res.payload as string)
-      if (response.status === 200) {
-        setAuth(true)
-      } else {
-        setAuth(false)
-      }
-    })
+    if (token) {
+      dispatch(profile()).then(res => {
+        const response = JSON.parse(res.payload as string)
+        if (response.status === 200) {
+          setAuth(true)
+        } else {
+          setAuth(false)
+        }
+      })
+    }
   }, [])
 
   return auth

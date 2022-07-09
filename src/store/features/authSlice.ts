@@ -3,6 +3,20 @@ import { AxiosError } from 'axios';
 import http from '../../utils/api/index';
 import { API } from '../../utils/api/api';
 
+export enum CURRENCY {
+  AUD = 'AUD',
+  USD = 'USD',
+  EUR = 'EUR',
+  CNY = 'CNY',
+}
+
+export enum CRYPTO {
+  BTC = 'BTC',
+  ETH = 'ETH',
+  BNB = 'BNB',
+  USDT = 'USDT',
+}
+
 type UserType = {
   id: number;
   username: string;
@@ -11,6 +25,11 @@ type UserType = {
 type UserDataType = {
   username: string;
   password: string;
+};
+
+type RateDataType = {
+  currency: string;
+  cryptocurrency: string;
 };
 
 type AuthStateType = {
@@ -68,6 +87,22 @@ export const profile = createAsyncThunk('profile', async (_, thunkApi) => {
   }
 });
 
+export const rate = createAsyncThunk(
+  'rate',
+  async (data: RateDataType, thunkApi) => {
+    try {
+      const res = await http.get(
+        API.rate + data.currency + '&' + data.cryptocurrency
+      );
+      return JSON.stringify(res);
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        JSON.stringify((error as AxiosError).response)
+      );
+    }
+  }
+);
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -79,10 +114,6 @@ export const authSlice = createSlice({
     },
   },
   extraReducers: {
-    // register states
-    [register.pending.type]: () => {},
-    [register.fulfilled.type]: () => {},
-    [register.rejected.type]: () => {},
     // login states
     [login.pending.type]: () => {},
     [login.fulfilled.type]: (state) => {

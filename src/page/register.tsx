@@ -1,11 +1,13 @@
 import React, { FormEvent, useState, ChangeEvent, FocusEvent } from 'react'
 import { Paper, FormControl, Stack, FormHelperText } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import { StyledContainer, StyledButton, StyledInput, StyledInputLabel } from '../component/styledComponent'
 import { useAppDispatch } from '../store/hooks'
 import { register } from '../store/features/authSlice'
 
 export default function Register() {
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const [data, setData] = useState({ username: '', password: '', confirmPassowrd: '' })
   const [error, setError] = useState(false)
   const [errorMessage, setErrorMessage] = useState(' ')
@@ -35,7 +37,7 @@ export default function Register() {
     dispatch(register({ username: data.username, password: data.password })).then(res => {
       const response = JSON.parse(res.payload as string)
       switch (response.status) {
-        case 201: console.log('user created')
+        case 201: navigate('/')
           break
         case 409: setError(true)
           setErrorMessage('* Username exists')
