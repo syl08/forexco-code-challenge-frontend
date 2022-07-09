@@ -1,6 +1,6 @@
 import React, { FormEvent, useState, ChangeEvent, FocusEvent } from 'react'
 import { Paper, FormControl, Stack, FormHelperText } from '@mui/material'
-import { RegisterContainer, StyledButton, StyledInput, StyledInputLabel } from '../component/styledComponent'
+import { StyledContainer, StyledButton, StyledInput, StyledInputLabel } from '../component/styledComponent'
 import { useAppDispatch } from '../store/hooks'
 import { register } from '../store/features/authSlice'
 
@@ -47,7 +47,7 @@ export default function Register() {
   }
 
   return (
-    <RegisterContainer maxWidth='xl' disableGutters >
+    <StyledContainer maxWidth='xl' disableGutters >
       <Paper component='form' onSubmit={handleSubmit} elevation={0} sx={{ width: '400px', height: '400px', borderRadius: 2 }}>
         <Stack display='flex' spacing={2} justifyContent='center' alignItems='center' height='400px'>
           <FormControl variant="standard" >
@@ -87,6 +87,6 @@ export default function Register() {
           <StyledButton type='submit' variant='contained' >Sign up</StyledButton>
         </Stack>
       </Paper>
-    </RegisterContainer>
+    </StyledContainer>
   )
 }

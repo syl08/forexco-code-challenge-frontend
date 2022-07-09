@@ -2,8 +2,8 @@ import { Button, InputBase, InputLabel } from '@mui/material';
 import styled from '@emotion/styled';
 import { Container } from '@mui/system';
 
-export const RegisterContainer = styled(Container)({
-  backgroundColor: '#F0F2FA',
+export const StyledContainer = styled(Container)({
+  backgroundColor: '#EFF0F6',
   height: '100vh',
   display: 'flex',
   justifyContent: 'center',

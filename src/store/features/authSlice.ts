@@ -44,7 +44,10 @@ export const login = createAsyncThunk(
   'login',
   async (data: UserDataType, thunkApi) => {
     try {
-      const res = await http.post(API.login, data);
+      const res = await http.post(API.login, {
+        username: data.username,
+        password: data.password,
+      });
       return JSON.stringify(res);
     } catch (error) {
       return thunkApi.rejectWithValue(
