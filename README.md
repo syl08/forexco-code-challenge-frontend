@@ -1,3 +1,7 @@
+# Description
+
+This project was deployed on [Heroku](https://cryptocurrency-rate-app.herokuapp.com/). Please click [here](https://cryptocurrency-rate-app.herokuapp.com/register) to sign up. After sign up successfully, the route will navigate to login page. Use your username and password to login, and then a token will be store in local storage. It will expired in 30mins, during this period, the account should be stay logged in, and can access authorized rate api.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
