@@ -3,20 +3,6 @@ import { AxiosError } from 'axios';
 import http from '../../utils/api/index';
 import { API } from '../../utils/api/api';
 
-export enum CURRENCY {
-  AUD = 'AUD',
-  USD = 'USD',
-  EUR = 'EUR',
-  CNY = 'CNY',
-}
-
-export enum CRYPTO {
-  BTC = 'BTC',
-  ETH = 'ETH',
-  BNB = 'BNB',
-  USDT = 'USDT',
-}
-
 type UserType = {
   id: number;
   username: string;
