@@ -116,7 +116,9 @@ export const authSlice = createSlice({
   extraReducers: {
     // login states
     [login.pending.type]: () => {},
-    [login.fulfilled.type]: (state) => {
+    [login.fulfilled.type]: (state, action: PayloadAction<string>) => {
+      const { data } = JSON.parse(action.payload as string);
+      localStorage.setItem('token', data.access_token);
       state.authenticated = true;
     },
     [login.rejected.type]: () => {},

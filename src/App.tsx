@@ -16,8 +16,7 @@ function App() {
       <Routes>
         <Route path='/' element={<PublicRoute><Login /></PublicRoute>} />
         <Route path='/register' element={<PublicRoute><Register /></PublicRoute>} />
-        {/* <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}
-        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

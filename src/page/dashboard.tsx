@@ -1,58 +1,93 @@
 import React, { useState, useEffect, ChangeEvent } from 'react'
-import { Box, Divider, FormControl, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, FormControl, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material'
 import converterIcon from '../assets/converter-icon.png'
 import converterSwapIcon from '../assets/converter-swap-icon.png'
 import { CurrencyBox, StyledBox, DashboardContainer, RefreshButton } from '../component/styledComponent'
 import { useAppDispatch } from '../store/hooks'
-import { getRate } from '../store/features/authSlice'
+import { getRate, logout } from '../store/features/authSlice'
 import Loading from '../component/loading'
 
 export default function Dashboard() {
   const dispatch = useAppDispatch()
   const [rate, setRate] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [currency, setCurrency] = useState('AUD');
-  const [crypto, setCrypto] = useState('BTC')
-  const [currencyAmount, setCurrenyAmout] = useState('')
-  const [cryptoAmount, setCryptoAmount] = useState('1')
+  const [currency1, setCurrency1] = useState('');
+  const [currency2, setCurrency2] = useState('')
+  const [amount1, setAmount1] = useState('1')
+  const [amount2, setAmount2] = useState('1')
   const [switched, setSwitched] = useState(false)
 
-  const handleCurrencyChange = (event: SelectChangeEvent) => {
+  const handleCurrencyChange1 = (event: SelectChangeEvent) => {
     if (switched) {
-      setCrypto(event.target.value)
+      setCurrency2(event.target.value)
     } else {
-      setCurrency(event.target.value);
+      setCurrency1(event.target.value);
     }
   };
 
-  const handleCryptoChange = (event: SelectChangeEvent) => {
+  const handleCurrencyChange2 = (event: SelectChangeEvent) => {
     if (switched) {
-      setCurrency(event.target.value)
+      setCurrency1(event.target.value)
     } else {
-      setCrypto(event.target.value);
+      setCurrency2(event.target.value);
     }
   };
 
-  const handleCurrencyAmountChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCurrenyAmout(event.currentTarget.value)
+  const handleAmount1Change = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = parseFloat(removeComma(event.target.value.replace(/[^0-9]/g, '')))
+    setAmount1(value.toLocaleString())
   }
 
-  const handleCryptoAmountChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCryptoAmount(event.currentTarget.value)
+  const handleAmount2Change = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = parseFloat(removeComma(event.target.value.replace(/[^0-9]/g, '')))
+    setAmount2(value.toLocaleString())
+    rate && setAmount1((value / rate).toLocaleString())
   }
+
+  const handleRefresh = () => {
+    if (currency1 && currency2) {
+      setLoading(true)
+      dispatch(getRate({ currency: switched ? currency2 : currency1, cryptocurrency: switched ? currency1 : currency2 })).then(res => {
+        const response = JSON.parse(res.payload as string)
+        setLoading(false)
+        if (response.status === 200) {
+          setRate(response.data.rate)
+        } else {
+          alert('rate not found')
+          setRate(0)
+        }
+      })
+    } else {
+      alert('please select currency')
+    }
+  }
+
+  const handleLogout = () => dispatch(logout())
+
+  const removeComma = (str: string) => str.replace(/,/g, '')
 
   useEffect(() => {
-    setLoading(true)
-    dispatch(getRate({ currency: switched ? currency : crypto, cryptocurrency: switched ? crypto : currency })).then(res => {
-      const response = JSON.parse(res.payload as string)
-      setLoading(false)
-      if (response.status === 200) {
-        setRate(response.data.rate)
-      } else {
+    if (amount1 && rate) {
+      const value = parseFloat(removeComma(amount1)) * rate
+      setAmount2(value.toLocaleString())
+    }
+  }, [amount1, rate])
 
-      }
-    })
-  }, [switched, currency, crypto])
+  useEffect(() => {
+    if (currency1 && currency2) {
+      setLoading(true)
+      dispatch(getRate({ currency: switched ? currency2 : currency1, cryptocurrency: switched ? currency1 : currency2 })).then(res => {
+        const response = JSON.parse(res.payload as string)
+        setLoading(false)
+        if (response.status === 200) {
+          setRate(response.data.rate)
+        } else {
+          alert('rate not found')
+          setRate(0)
+        }
+      })
+    }
+  }, [switched, currency1, currency2])
 
   return (
     <DashboardContainer maxWidth='xl' disableGutters >
@@ -80,21 +115,21 @@ export default function Dashboard() {
             <Stack direction='row' justifyContent='center'>
               <FormControl size='small' sx={{ mt: 1.2, ml: 7, width: 140 }}>
                 <Select
-                  value={switched ? crypto : currency}
-                  onChange={handleCurrencyChange}
+                  value={switched ? currency2 : currency1}
+                  onChange={handleCurrencyChange1}
                   variant='standard'
                   disableUnderline
                   displayEmpty
                   sx={{ color: '#012754', fontWeight: 'bold', fontSize: 18 }}
                 >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   <MenuItem value={switched ? 'BTC' : 'AUD'}>
                     {switched ? 'BTC' : 'AUD'}
                   </MenuItem>
                   <MenuItem value={switched ? 'ETH' : 'USD'}>
                     {switched ? 'ETH' : 'USD'}
-                  </MenuItem>
-                  <MenuItem value={switched ? 'BNB' : 'EUR'}>
-                    {switched ? 'BNB' : 'EUR'}
                   </MenuItem>
                   <MenuItem value={switched ? 'USDT' : 'CNY'}>
                     {switched ? 'USDT' : 'CNY'}
@@ -111,8 +146,8 @@ export default function Dashboard() {
               <TextField
                 size='small'
                 variant="standard"
-                value={currencyAmount}
-                onChange={handleCurrencyAmountChange}
+                value={amount1}
+                onChange={handleAmount1Change}
                 sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
                 }
                 inputProps={{ style: { textAlign: 'end' } }}
@@ -132,21 +167,21 @@ export default function Dashboard() {
             <Stack direction='row' justifyContent='center'>
               <FormControl size='small' sx={{ mt: 1.2, ml: 7, width: 140 }}>
                 <Select
-                  value={switched ? currency : crypto}
-                  onChange={handleCryptoChange}
+                  value={switched ? currency1 : currency2}
+                  onChange={handleCurrencyChange2}
                   variant='standard'
                   disableUnderline
                   displayEmpty
                   sx={{ color: '#012754', fontWeight: 'bold', fontSize: 18 }}
                 >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   <MenuItem value={switched ? 'AUD' : 'BTC'}>
                     {switched ? 'AUD' : 'BTC'}
                   </MenuItem>
                   <MenuItem value={switched ? 'USD' : 'ETH'}>
                     {switched ? 'USD' : 'ETH'}
-                  </MenuItem>
-                  <MenuItem value={switched ? 'EUR' : 'BNB'}>
-                    {switched ? 'EUR' : 'BNB'}
                   </MenuItem>
                   <MenuItem value={switched ? 'CNY' : 'USDT'}>
                     {switched ? 'CNY' : 'USDT'}
@@ -158,8 +193,8 @@ export default function Dashboard() {
               }} />
               <TextField
                 size='small'
-                value={cryptoAmount}
-                onChange={handleCryptoAmountChange}
+                value={amount2}
+                onChange={handleAmount2Change}
                 sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
                 }
                 inputProps={{ style: { textAlign: 'end' } }}
@@ -170,7 +205,8 @@ export default function Dashboard() {
           <Typography variant='h5' color='#33428E' fontWeight='bold' component='div' >
             Market Rate {rate}
           </Typography>
-          <RefreshButton>Refresh</RefreshButton>
+          <RefreshButton onClick={handleRefresh}>Refresh</RefreshButton>
+          <Button size='small' onClick={handleLogout} >logout</Button>
         </Stack>
       </CurrencyBox>
     </DashboardContainer >
