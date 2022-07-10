@@ -1,23 +1,62 @@
-import React from 'react'
+import React, { useState, useEffect, ChangeEvent } from 'react'
 import { Box, Divider, FormControl, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from '@mui/material'
 import converterIcon from '../assets/converter-icon.png'
 import converterSwapIcon from '../assets/converter-swap-icon.png'
 import { CurrencyBox, StyledBox, DashboardContainer, RefreshButton } from '../component/styledComponent'
+import { useAppDispatch } from '../store/hooks'
+import { getRate } from '../store/features/authSlice'
+import Loading from '../component/loading'
 
 export default function Dashboard() {
-  const [currency, setCurrency] = React.useState('AUD');
-  const [crypto, setCrypto] = React.useState('BTC')
+  const dispatch = useAppDispatch()
+  const [rate, setRate] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [currency, setCurrency] = useState('AUD');
+  const [crypto, setCrypto] = useState('BTC')
+  const [currencyAmount, setCurrenyAmout] = useState('')
+  const [cryptoAmount, setCryptoAmount] = useState('1')
+  const [switched, setSwitched] = useState(false)
 
   const handleCurrencyChange = (event: SelectChangeEvent) => {
-    setCurrency(event.target.value);
+    if (switched) {
+      setCrypto(event.target.value)
+    } else {
+      setCurrency(event.target.value);
+    }
   };
 
   const handleCryptoChange = (event: SelectChangeEvent) => {
-    setCrypto(event.target.value);
+    if (switched) {
+      setCurrency(event.target.value)
+    } else {
+      setCrypto(event.target.value);
+    }
   };
+
+  const handleCurrencyAmountChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setCurrenyAmout(event.currentTarget.value)
+  }
+
+  const handleCryptoAmountChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setCryptoAmount(event.currentTarget.value)
+  }
+
+  useEffect(() => {
+    setLoading(true)
+    dispatch(getRate({ currency: switched ? currency : crypto, cryptocurrency: switched ? crypto : currency })).then(res => {
+      const response = JSON.parse(res.payload as string)
+      setLoading(false)
+      if (response.status === 200) {
+        setRate(response.data.rate)
+      } else {
+
+      }
+    })
+  }, [switched, currency, crypto])
 
   return (
     <DashboardContainer maxWidth='xl' disableGutters >
+      <Loading open={loading} />
       <CurrencyBox>
         <Stack width='580px' justifyContent='center' alignItems='center' spacing={4} >
           <Stack direction='row' mb={1} >
@@ -41,24 +80,44 @@ export default function Dashboard() {
             <Stack direction='row' justifyContent='center'>
               <FormControl size='small' sx={{ mt: 1.2, ml: 7, width: 140 }}>
                 <Select
-                  value={currency}
+                  value={switched ? crypto : currency}
                   onChange={handleCurrencyChange}
                   variant='standard'
                   disableUnderline
                   displayEmpty
                   sx={{ color: '#012754', fontWeight: 'bold', fontSize: 18 }}
                 >
-                  <MenuItem value='AUD'>AUD</MenuItem>
-                  <MenuItem value='USD'>USD</MenuItem>
-                  <MenuItem value='EUR'>EUR</MenuItem>
-                  <MenuItem value="CNY">CNY</MenuItem>
+                  <MenuItem value={switched ? 'BTC' : 'AUD'}>
+                    {switched ? 'BTC' : 'AUD'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'ETH' : 'USD'}>
+                    {switched ? 'ETH' : 'USD'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'BNB' : 'EUR'}>
+                    {switched ? 'BNB' : 'EUR'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'USDT' : 'CNY'}>
+                    {switched ? 'USDT' : 'CNY'}
+                  </MenuItem>
                 </Select>
               </FormControl>
-              <Divider orientation="vertical" variant="middle" flexItem sx={{
-                borderRightWidth: 2.5, borderColor: '#012754'
-              }} />
-              <TextField size='small' sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
-              } inputProps={{ style: { textAlign: 'end' } }} InputProps={{ disableUnderline: true, style: { color: '#012754', fontWeight: 'bold' } }} variant="standard" />
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{
+                  borderRightWidth: 2.5, borderColor: '#012754'
+                }} />
+              <TextField
+                size='small'
+                variant="standard"
+                value={currencyAmount}
+                onChange={handleCurrencyAmountChange}
+                sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
+                }
+                inputProps={{ style: { textAlign: 'end' } }}
+                InputProps={{ disableUnderline: true, style: { color: '#012754', fontWeight: 'bold' } }}
+              />
             </Stack>
           </StyledBox>
           <img
@@ -66,33 +125,50 @@ export default function Dashboard() {
             alt='converter-swap-icon'
             loading="lazy"
             width={25}
+            style={{ cursor: 'pointer' }}
+            onClick={() => setSwitched(!switched)}
           />
           <StyledBox content='"To"'>
             <Stack direction='row' justifyContent='center'>
               <FormControl size='small' sx={{ mt: 1.2, ml: 7, width: 140 }}>
                 <Select
-                  value={crypto}
+                  value={switched ? currency : crypto}
                   onChange={handleCryptoChange}
                   variant='standard'
                   disableUnderline
                   displayEmpty
                   sx={{ color: '#012754', fontWeight: 'bold', fontSize: 18 }}
                 >
-                  <MenuItem value='BTC'>BTC</MenuItem>
-                  <MenuItem value='ETH'>ETH</MenuItem>
-                  <MenuItem value='BNB'>BNB</MenuItem>
-                  <MenuItem value="USDT">USDT</MenuItem>
+                  <MenuItem value={switched ? 'AUD' : 'BTC'}>
+                    {switched ? 'AUD' : 'BTC'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'USD' : 'ETH'}>
+                    {switched ? 'USD' : 'ETH'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'EUR' : 'BNB'}>
+                    {switched ? 'EUR' : 'BNB'}
+                  </MenuItem>
+                  <MenuItem value={switched ? 'CNY' : 'USDT'}>
+                    {switched ? 'CNY' : 'USDT'}
+                  </MenuItem>
                 </Select>
               </FormControl>
               <Divider orientation="vertical" variant="middle" flexItem sx={{
                 borderRightWidth: 2.5, borderColor: '#012754'
               }} />
-              <TextField size='small' sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
-              } inputProps={{ style: { textAlign: 'end' } }} InputProps={{ disableUnderline: true, style: { color: '#012754', fontWeight: 'bold' } }} variant="standard" />
+              <TextField
+                size='small'
+                value={cryptoAmount}
+                onChange={handleCryptoAmountChange}
+                sx={{ mt: 1.2, ml: 2, mr: 3, width: 160 }
+                }
+                inputProps={{ style: { textAlign: 'end' } }}
+                InputProps={{ disableUnderline: true, style: { color: '#012754', fontWeight: 'bold' } }}
+                variant="standard" />
             </Stack>
           </StyledBox>
           <Typography variant='h5' color='#33428E' fontWeight='bold' component='div' >
-            Market Rate
+            Market Rate {rate}
           </Typography>
           <RefreshButton>Refresh</RefreshButton>
         </Stack>

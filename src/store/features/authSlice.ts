@@ -87,7 +87,7 @@ export const profile = createAsyncThunk('profile', async (_, thunkApi) => {
   }
 });
 
-export const rate = createAsyncThunk(
+export const getRate = createAsyncThunk(
   'rate',
   async (data: RateDataType, thunkApi) => {
     try {
